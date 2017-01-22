@@ -1,11 +1,11 @@
 package ru.ifmo.droid2016.smstotelegram.activities;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -19,9 +19,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import ru.ifmo.droid2016.smstotelegram.R;
-import ru.ifmo.droid2016.smstotelegram.Variables;
 import ru.ifmo.droid2016.smstotelegram.model.User;
+import ru.ifmo.droid2016.smstotelegram.service.BackService;
+
+import static ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp.bot;
+import static ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp.chat;
+import static ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp.intent;
 
 /**
  * Created by fox on 21.01.2017.
@@ -78,8 +81,8 @@ public class ListOfUsersActivity extends ListActivity {
 
         GetUpdates getUpdates = new GetUpdates().limit(100).offset(0).timeout(0);
 
-        if (Variables.bot != null) {
-            Variables.bot.bot.execute(getUpdates, new Callback<GetUpdates, GetUpdatesResponse>() {
+        if (bot != null) {
+            bot.execute(getUpdates, new Callback<GetUpdates, GetUpdatesResponse>() {
                 @Override
                 public void onResponse(GetUpdates request, GetUpdatesResponse response) {
                     Log.e("Meow", "onResponse");
@@ -109,7 +112,8 @@ public class ListOfUsersActivity extends ListActivity {
 
     @Override
     protected void onListItemClick(ListView listView, View view, int position, long id) {
-        Variables.chat = closure.updates.get(position).message().chat();
+        chat = closure.updates.get(position).message().chat();
+        startService(intent);
         finish();
     }
 }

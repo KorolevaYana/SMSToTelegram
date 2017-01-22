@@ -6,30 +6,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.ContactsContract;
-import android.provider.Telephony;
 import android.support.annotation.Nullable;
-import android.telephony.SmsMessage;
 import android.util.Log;
 
 import com.pengrad.telegrambot.Callback;
-import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.request.ForceReply;
-import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
-import ru.ifmo.droid2016.smstotelegram.Variables;
-
-import static ru.ifmo.droid2016.smstotelegram.Variables.bot;
+import static ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp.bot;
 
 /**
  * Created by Koroleva Yana.
@@ -77,7 +65,7 @@ public class SMSService extends Service {
         SendMessage request = new SendMessage(intent.getLongExtra("chatId", -1), message);
         Log.e("Meow", "Request");
 
-        bot.bot.execute(request, new Callback<SendMessage, SendResponse>() {
+        bot.execute(request, new Callback<SendMessage, SendResponse>() {
             @Override
             public void onResponse(SendMessage request, SendResponse response) {
                 Log.e("Meow", "Sending message");
@@ -88,7 +76,6 @@ public class SMSService extends Service {
             @Override
             public void onFailure(SendMessage request, IOException e) {
                 Log.e("Meow", "Failed");
-
             }
         });
         return START_STICKY;

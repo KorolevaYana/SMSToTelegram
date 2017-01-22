@@ -2,4 +2,6 @@
     <string name="app_name">SMSToTelegram</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
+    <string name="type_username">Please, type @username to send sms to.</string>
+    <string name="ok">Ok</string>
 </resources>
