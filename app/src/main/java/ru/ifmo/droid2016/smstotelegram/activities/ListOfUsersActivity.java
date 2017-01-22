@@ -55,6 +55,7 @@ public class ListOfUsersActivity extends ListActivity {
                     /*contacts.add(new Contact(update.message().chat().firstName(),
                             update.message().chat().lastName(),
                             update.message().chat().username()));*/
+
                         long id = update.message().chat().id();
                         ids.add(id);
                         if (update.message().chat().title() != null) {

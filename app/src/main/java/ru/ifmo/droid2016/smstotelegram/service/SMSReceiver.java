@@ -13,7 +13,7 @@ import ru.ifmo.droid2016.smstotelegram.Variables;
  * Created by Koroleva Yana.
  */
 
-public class SMSReciever extends BroadcastReceiver {
+public class SMSReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         SmsMessage[] smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent);

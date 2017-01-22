@@ -13,8 +13,7 @@ public class SMSToTelegramBot {
     public TelegramBot bot;
 
     public SMSToTelegramBot() {
+
         this.bot = TelegramBotAdapter.build("262208833:AAHGT1IQLktkCoGKJxnc0dMGmQm5KAidbws"); //bot API token example
     }
-
-
 }

@@ -14,7 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service android:name=".service.SMSService" />
-        <!--<receiver android:name="ru.ifmo.droid2016.smstotelegram.service.SMSReciever"
+        <service android:name=".service.SMSReceiverService"/>
+        <!--<receiver android:name="ru.ifmo.droid2016.smstotelegram.service.SMSReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter android:priority="10000">
