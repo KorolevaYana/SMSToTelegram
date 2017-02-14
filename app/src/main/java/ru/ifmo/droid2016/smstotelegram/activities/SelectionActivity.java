@@ -1,7 +1,10 @@
 package ru.ifmo.droid2016.smstotelegram.activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -25,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import ru.ifmo.droid2016.smstotelegram.R;
+import ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp;
 import ru.ifmo.droid2016.smstotelegram.model.User;
 
 import static ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp.bot;
@@ -40,8 +44,10 @@ public class SelectionActivity extends Activity {
         boolean getFailure = false;
         List<Update> updates = new ArrayList<>();
 
-        private Closure(){}
+        private Closure() {
+        }
     }
+
     HashSet<User> users = new HashSet<>();
     List<String> usernames = new ArrayList<>();
     List<Chat> chats = new ArrayList<>();
@@ -49,22 +55,60 @@ public class SelectionActivity extends Activity {
 
     EditText editText;
     Button okBtn;
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
 
-        editText =(EditText) findViewById(R.id.editText);
+        editText = (EditText) findViewById(R.id.editText);
         okBtn = (Button) findViewById(R.id.okButton);
 
+        Log.e("Meow", "Selection OnCreate");
+        String appName = "org.telegram.messenger";
+        boolean isInstalled = isAppAvailable(getApplicationContext(), appName);
+
+        if (isInstalled) {
+            Log.e("Meow", "isInstalled");
+            Intent tmpIntent = new Intent(Intent.ACTION_VIEW);
+            tmpIntent.setData(Uri.parse("https://telegram.me/sms_to_telegram_bot?start=vCH1vGWJxfSeofSAs0K5PA"));
+            startActivity(tmpIntent);
+
+            findUsers();
+        } else {
+            Toast toast = Toast.makeText(getApplicationContext(), "Telegram isn't installed.", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+
+        okBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String username = editText.getText().toString();
+                if (usernames.contains(username)) {
+                    int index = usernames.indexOf(username);
+                    chat = chats.get(index);
+                    startService(intent);
+
+                    finish();
+                } else {
+                    Toast toast = Toast.makeText(getApplicationContext(), "Wrong username or bot has no access.", Toast.LENGTH_LONG);
+                    toast.show();
+                }
+            }
+        });
+    }
+
+    void findUsers() {
         final Handler handler = new Handler() {
             public void handleMessage(android.os.Message message) {
                 for (Update update : closure.updates) {
                     Log.e("Meow", update.message().chat() == null ? "fyr" : "kek");
                     if (update.message().chat().username() != null) {
                         User user = new User(update.message().chat().firstName(),
-                                    update.message().chat().lastName(),
-                                    "@" + update.message().chat().username(),
-                                    update.message().chat().id());
+                                update.message().chat().lastName(),
+                                "@" + update.message().chat().username(),
+                                update.message().chat().id());
                         if (!users.contains(user)) {
                             users.add(user);
                             usernames.add(user.username);
@@ -108,43 +152,16 @@ public class SelectionActivity extends Activity {
             finish();
         }
 
+    }
 
-        okBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String username = editText.getText().toString();
-                if (usernames.contains(username)) {
-                    int index = usernames.indexOf(username);
-                    chat = chats.get(index);
-                    startService(intent);
+    private boolean isAppAvailable(Context context, String appName) {
+        PackageManager pm = context.getPackageManager();
+        try {
+            pm.getPackageInfo(appName, PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
 
-                    SendMessage request = new SendMessage(chat.id(), "Connected.");
-                    bot.execute(request, new Callback<SendMessage, SendResponse>() {
-                        @Override
-                        public void onResponse(SendMessage request, SendResponse response) {
-                            Log.e("Meow", "Sending message");
-                            boolean ok = response.isOk();
-                            Log.e("Meow", String.valueOf(ok) + ": " + response.toString());
-                        }
-
-                        @Override
-                        public void onFailure(SendMessage request, IOException e) {
-                            Log.e("Meow", "Failure");
-                            Toast toast = Toast.makeText(getApplicationContext(), "Wrong username or bot has no access.", Toast.LENGTH_LONG);
-                            toast.show();
-                            closure.getFailure = true;
-                        }
-                    });
-                    if (!closure.getFailure) {
-                        finish();
-                    } else {
-                        closure.getFailure = false;
-                    }
-                } else {
-                    Toast toast = Toast.makeText(getApplicationContext(), "Wrong username or bot has no access.", Toast.LENGTH_LONG);
-                    toast.show();
-                }
-            }
-        });
     }
 }

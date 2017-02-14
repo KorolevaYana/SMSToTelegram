@@ -14,6 +14,7 @@ import ru.ifmo.droid2016.smstotelegram.service.SMSReceiver;
  */
 
 public class SMSToTelegramApp extends Application {
+    //example token
     private final static String TOKEN = "262208833:AAGjownCgk7mC16vhOVIAQFiW7QrzTyG1XU";
 
     public static SMSReceiver receiver;
