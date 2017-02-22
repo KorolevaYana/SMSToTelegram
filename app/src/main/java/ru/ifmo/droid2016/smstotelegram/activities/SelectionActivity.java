@@ -74,7 +74,6 @@ public class SelectionActivity extends Activity {
             tmpIntent.setData(Uri.parse("https://telegram.me/sms_to_telegram_bot?start=vCH1vGWJxfSeofSAs0K5PA"));
             startActivity(tmpIntent);
 
-            findUsers();
         } else {
             Toast toast = Toast.makeText(getApplicationContext(), "Telegram isn't installed.", Toast.LENGTH_LONG);
             toast.show();
@@ -84,6 +83,34 @@ public class SelectionActivity extends Activity {
         okBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                findUsers();
+
+            }
+        });
+    }
+
+    void findUsers() {
+        final Handler handler = new Handler() {
+            public void handleMessage(android.os.Message message) {
+                if (closure.updates != null) {
+                    for (Update update : closure.updates) {
+                        Log.e("Meow", update.message().chat() == null ? "fyr" : "kek");
+                        if (update.message().chat().username() != null) {
+                            User user = new User(update.message().chat().firstName(),
+                                    update.message().chat().lastName(),
+                                    "@" + update.message().chat().username(),
+                                    update.message().chat().id());
+                            if (!users.contains(user)) {
+                                users.add(user);
+                                usernames.add(user.username);
+                                chats.add(update.message().chat());
+                            }
+                        }
+                    }
+                } else {
+                    Log.e("Meow", "Problems with connecting to Telegram. Probably old app version.");
+                }
+
                 String username = editText.getText().toString();
                 if (usernames.contains(username)) {
                     int index = usernames.indexOf(username);
@@ -94,28 +121,6 @@ public class SelectionActivity extends Activity {
                 } else {
                     Toast toast = Toast.makeText(getApplicationContext(), "Wrong username or bot has no access.", Toast.LENGTH_LONG);
                     toast.show();
-                }
-            }
-        });
-    }
-
-    void findUsers() {
-        final Handler handler = new Handler() {
-            public void handleMessage(android.os.Message message) {
-                for (Update update : closure.updates) {
-                    Log.e("Meow", update.message().chat() == null ? "fyr" : "kek");
-                    if (update.message().chat().username() != null) {
-                        User user = new User(update.message().chat().firstName(),
-                                update.message().chat().lastName(),
-                                "@" + update.message().chat().username(),
-                                update.message().chat().id());
-                        if (!users.contains(user)) {
-                            users.add(user);
-                            usernames.add(user.username);
-                            chats.add(update.message().chat());
-                        }
-
-                    }
                 }
             }
         };

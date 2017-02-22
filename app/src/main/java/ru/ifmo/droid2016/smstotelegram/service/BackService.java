@@ -3,6 +3,7 @@ package ru.ifmo.droid2016.smstotelegram.service;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Telephony;
@@ -28,8 +29,14 @@ public class BackService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.e("BackService", "onCreate");
-        SMSReceiver receiver = new SMSReceiver();
-        registerReceiver(receiver, new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION), null, new Handler());
+        receiver = new SMSReceiver();
+        if (Build.VERSION.SDK_INT >= 19) {
+            registerReceiver(receiver, new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION), null, new Handler());
+        } else {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction("android.provider.Telephony.SMS_RECEIVED");
+            registerReceiver(receiver, new IntentFilter(), null, new Handler());
+        }
         Log.e("BackService", "Receiver registered");
     }
 
@@ -38,11 +45,7 @@ public class BackService extends Service {
         super.onDestroy();
         Log.e("BackService", "onDestroy");
         if (receiver != null) {
-            try {
-                this.unregisterReceiver(receiver);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            this.unregisterReceiver(receiver);
         }
     }
 
