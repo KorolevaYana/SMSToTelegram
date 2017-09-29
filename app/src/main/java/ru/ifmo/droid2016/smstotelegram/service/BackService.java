@@ -28,10 +28,13 @@ public class BackService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.e("BackService", "onCreate");
+        Log.e("BackService", "onCreate, SDK: " + Build.VERSION.SDK_INT);
         receiver = new SMSReceiver();
         if (Build.VERSION.SDK_INT >= 19) {
-            registerReceiver(receiver, new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION), null, new Handler());
+            IntentFilter filter = new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION);
+            filter.setPriority(100);
+            Intent result = registerReceiver(receiver, filter, null, new Handler());
+            Log.e("meow", "BackService::onCreate, result: " + result);
         } else {
             IntentFilter filter = new IntentFilter();
             filter.addAction("android.provider.Telephony.SMS_RECEIVED");

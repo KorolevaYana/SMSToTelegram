@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import ru.ifmo.droid2016.smstotelegram.R;
 import ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp;
@@ -42,6 +43,7 @@ import static ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp.intent;
 public class SelectionActivity extends Activity {
     class Closure {
         boolean getFailure = false;
+        String key = null;
         List<Update> updates = new ArrayList<>();
 
         private Closure() {
@@ -55,6 +57,16 @@ public class SelectionActivity extends Activity {
 
     EditText editText;
     Button okBtn;
+
+    static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    static Random rnd = new Random();
+
+    String randomString( int len ){
+        StringBuilder sb = new StringBuilder( len );
+        for( int i = 0; i < len; i++ )
+            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+        return sb.toString();
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,7 +83,11 @@ public class SelectionActivity extends Activity {
         if (isInstalled) {
             Log.e("Meow", "isInstalled");
             Intent tmpIntent = new Intent(Intent.ACTION_VIEW);
-            tmpIntent.setData(Uri.parse("https://telegram.me/sms_to_telegram_bot?start=vCH1vGWJxfSeofSAs0K5PA"));
+
+            closure.key = randomString(22);
+            Log.e("meow", "key: " + closure.key);
+
+            tmpIntent.setData(Uri.parse("https://telegram.me/sms_to_telegram_bot?start=" + closure.key));
             startActivity(tmpIntent);
 
         } else {
@@ -92,25 +108,48 @@ public class SelectionActivity extends Activity {
     void findUsers() {
         final Handler handler = new Handler() {
             public void handleMessage(android.os.Message message) {
+                String defaultUsername = null;
                 if (closure.updates != null) {
                     for (Update update : closure.updates) {
+                        Log.e("meow", "message");
+                        Log.e("meow", "  username: " + update.message().chat().username());
+                        Log.e("meow", "  text: " + update.message().text());
                         Log.e("Meow", update.message().chat() == null ? "fyr" : "kek");
-                        if (update.message().chat().username() != null) {
-                            User user = new User(update.message().chat().firstName(),
-                                    update.message().chat().lastName(),
-                                    "@" + update.message().chat().username(),
-                                    update.message().chat().id());
-                            if (!users.contains(user)) {
-                                users.add(user);
-                                usernames.add(user.username);
-                                chats.add(update.message().chat());
-                            }
+                        if (update.message().chat().username() == null)
+                            continue;
+                        User user = new User(update.message().chat().firstName(),
+                                update.message().chat().lastName(),
+                                "@" + update.message().chat().username(),
+                                update.message().chat().id());
+                        if (!users.contains(user)) {
+                            users.add(user);
+                            usernames.add(user.username);
+                            chats.add(update.message().chat());
+                        }
+                        if (!update.message().text().startsWith("/"))
+                            continue;
+                        String[] command = update.message().text().split(" ");
+                        Log.e("meow", "command: " + command[0]);
+                        Log.e("meow", "command: " + command[1]);
+                        if (command.length >= 2 && command[0].equals("/start") && command[1].equals(closure.key)) {
+                            defaultUsername = "@" + update.message().chat().username();
                         }
                     }
                 } else {
                     Log.e("Meow", "Problems with connecting to Telegram. Probably old app version.");
                 }
 
+                Log.e("meow", "default username:" + defaultUsername);
+                if (defaultUsername != null && usernames.contains(defaultUsername)) {
+                    int index = usernames.indexOf(defaultUsername);
+                    chat = chats.get(index);
+                    startService(intent);
+
+                    finish();
+                    Toast toast = Toast.makeText(getApplicationContext(), "connected to: " + defaultUsername, Toast.LENGTH_LONG);
+                    toast.show();
+                    return;
+                }
                 String username = editText.getText().toString();
                 if (usernames.contains(username)) {
                     int index = usernames.indexOf(username);
@@ -131,7 +170,8 @@ public class SelectionActivity extends Activity {
             bot.execute(getUpdates, new Callback<GetUpdates, GetUpdatesResponse>() {
                 @Override
                 public void onResponse(GetUpdates request, GetUpdatesResponse response) {
-                    Log.e("Meow", "onResponse");
+                    Log.e("Meow", "onResponse, is ok: " + (response.isOk() ? "true" : "false"));
+                    Log.e("Meow", "response description: " + response.description());
                     closure.updates = response.updates();
 
                     Log.e("Meow", "lala" + ((closure.updates == null) ? "1" : "2"));

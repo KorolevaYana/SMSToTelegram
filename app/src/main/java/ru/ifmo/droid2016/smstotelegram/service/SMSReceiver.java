@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
+import android.util.Log;
 
 import static ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp.chat;
 
@@ -16,6 +17,7 @@ import static ru.ifmo.droid2016.smstotelegram.SMSToTelegramApp.chat;
 public class SMSReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.e("meow", "SMSReceiver::onReceive ()");
         SmsMessage[] smsMessages;
         if (Build.VERSION.SDK_INT >= 19) {
             smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
