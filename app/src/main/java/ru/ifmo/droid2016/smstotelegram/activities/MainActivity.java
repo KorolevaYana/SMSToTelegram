@@ -1,10 +1,14 @@
 package ru.ifmo.droid2016.smstotelegram.activities;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +27,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i("MainActivity", "onCreate");
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECEIVE_SMS)) {
+                Log.e("meow", "TODO: show explanation");
+            }
+            ActivityCompat.requestPermissions (this, new String[]{Manifest.permission.RECEIVE_SMS}, 239);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)) {
+                Log.e("meow", "TODO: show explanation");
+            }
+            ActivityCompat.requestPermissions (this, new String[]{Manifest.permission.READ_CONTACTS}, 1239);
+        }
 
         setContentView(R.layout.activity_main);
         intent = new Intent(this, BackService.class);
@@ -44,6 +61,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         redrawButtons();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        Log.e("meow", "onRequestPermissionsResult");
+        Log.e("meow", "  code: " + requestCode);
+        for (String x: permissions) {
+            Log.e ("meow", "  permission: " + x);
+        }
+        for (int x: grantResults) {
+            Log.e ("meow", "  grant result: " + x);
+        }
     }
 
     @Override
